@@ -147,7 +147,6 @@ def unitary_gauge(hard_gate, noisy_sim):
     avg = average_gate_set(hard_gate, noisy_sim)
     choi = tqm.Superop.from_ptm(avg).choi/m
     eigenval, eigenvec = eigenvector_closest_to_one(choi)
-    print(eigenval)
     u, p = polar(unvec(eigenvec*np.sqrt(m)))
     return u
 

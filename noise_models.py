@@ -14,11 +14,11 @@ cnot_gate_rotation = 0.073675
 # H gate infidelity     = 0.00099999586597
 # CNOT gate infidelity  = 0.01000003672978 
 
-circs = [tq.Circuit({0: i}) for i in easy_gates]
+easy_gate_circuits = [tq.Circuit({0: i}) for i in easy_gates]
 
 strength = [1,2,3,4]
-strength_scales = [0.5, 1.0, 1.5, 10]
-
+strength_scales = [0.5, 1.0, 1.5, 2]
+    
 def process_fidelity(circuit: tq.Circuit, simulator):
     ideal_unitary_matrix = tq.Simulator().operator(circuit= circuit).upgrade().mat()
     ideal_unitary_superop = tqm.Superop.from_rowstack(ideal_unitary_matrix) 
@@ -48,7 +48,7 @@ def gate_independent_simulators():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_1 = 1 - sum(process_fidelity(circ, noisy_sim_1) for circ in circs) / len(circs)
+    infid_1 = 1 - sum(process_fidelity(circ, noisy_sim_1) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     gate_ind_simulators[1] = (noisy_sim_1, infid_1)
 
     # Strength 2
@@ -62,7 +62,7 @@ def gate_independent_simulators():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_2 = 1 - sum(process_fidelity(circ, noisy_sim_2) for circ in circs) / len(circs)
+    infid_2 = 1 - sum(process_fidelity(circ, noisy_sim_2) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     gate_ind_simulators[2] = (noisy_sim_2, infid_2)
 
     # Strength 3
@@ -76,12 +76,12 @@ def gate_independent_simulators():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_3 = 1 - sum(process_fidelity(circ, noisy_sim_3) for circ in circs) / len(circs)
+    infid_3 = 1 - sum(process_fidelity(circ, noisy_sim_3) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     gate_ind_simulators[3] = (noisy_sim_3, infid_3)
 
     # Strength 4
     sim4 = tq.Simulator()
-    easy_dict_4 = {gate: tq.Gate.rp("X", 1.81215 * 10) @ gate.mat for gate in clifford_gates}
+    easy_dict_4 = {gate: tq.Gate.rp("X", 1.81215 * 2) @ gate.mat for gate in clifford_gates}
     def gate_replace_4(gate):
         return easy_dict_4[gate]
     noisy_sim_4 = (
@@ -90,7 +90,7 @@ def gate_independent_simulators():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_4 = 1 - sum(process_fidelity(circ, noisy_sim_4) for circ in circs) / len(circs)
+    infid_4 = 1 - sum(process_fidelity(circ, noisy_sim_4) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     gate_ind_simulators[4] = (noisy_sim_4, infid_4)
 
     return gate_ind_simulators
@@ -115,7 +115,7 @@ def gate_dependent_simulators():
                .add_overrotation(single_sys=h_gate_rotation, match=match_h)
                .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
         )
-        infidelity = 1 - sum([process_fidelity(circ, noisy_sim) for circ in circs]) / len(circs)
+        infidelity = 1 - sum([process_fidelity(circ, noisy_sim) for circ in easy_gate_circuits]) / len(easy_gate_circuits)
         gate_dep_simulators[label] = (noisy_sim, infidelity)
     return gate_dep_simulators
 
@@ -129,7 +129,7 @@ def zxzxz_simulators():
 
     zxzxz_dict = {gate: ZXZXZ_decompose(tq.Circuit([{0:gate}])) for gate in clifford_gates}
 
-    circs = [ZXZXZ_decompose(tq.Circuit([{0:easy}])) for easy in easy_gates]
+    easy_gate_circuits = [ZXZXZ_decompose(tq.Circuit([{0:easy}])) for easy in easy_gates]
     zxzxz_simulators = {}
     noisy_easy_gates = {}
 
@@ -143,7 +143,7 @@ def zxzxz_simulators():
                 .add_overrotation(single_sys=h_gate_rotation, match=match_h)
                 .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
         )
-        infidelity = 1 - sum([process_fidelity(circ, noisy_sim) for circ in circs]) / len(circs)
+        infidelity = 1 - sum([process_fidelity(circ, noisy_sim) for circ in easy_gate_circuits]) / len(easy_gate_circuits)
 
         zxzxz_simulators[label] = (noisy_sim, infidelity)
         noisy_easy_gates[label] = {gate: zxzxz_simulators[label][0].operator(zxzxz_dict[gate]).mat() for gate in clifford_gates}
@@ -238,7 +238,7 @@ def zxzxz_simulators_tilted():
 
     zxzxz_dict = {gate: ZXZXZ_decompose(tq.Circuit([{0:gate}])) for gate in clifford_gates}
     zxzxz_simulators = {}
-    circs = [ZXZXZ_decompose(tq.Circuit([{0: easy}])) for easy in easy_gates]
+    easy_gate_circuits = [ZXZXZ_decompose(tq.Circuit([{0: easy}])) for easy in easy_gates]
     noisy_easy_gates = {}
 
     # Strength 1 (0.5 * x_strength_tilted)
@@ -253,7 +253,7 @@ def zxzxz_simulators_tilted():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_1 = 1 - sum(process_fidelity(circ, noisy_sim_1) for circ in circs) / len(circs)
+    infid_1 = 1 - sum(process_fidelity(circ, noisy_sim_1) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     zxzxz_simulators[1] = (noisy_sim_1, infid_1)
 
     # Strength 2 (1.0 * x_strength_tilted)
@@ -268,7 +268,7 @@ def zxzxz_simulators_tilted():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_2 = 1 - sum(process_fidelity(circ, noisy_sim_2) for circ in circs) / len(circs)
+    infid_2 = 1 - sum(process_fidelity(circ, noisy_sim_2) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     zxzxz_simulators[2] = (noisy_sim_2, infid_2)
 
     # Strength 3 (1.5 * x_strength_tilted)
@@ -283,7 +283,7 @@ def zxzxz_simulators_tilted():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_3 = 1 - sum(process_fidelity(circ, noisy_sim_3) for circ in circs) / len(circs)
+    infid_3 = 1 - sum(process_fidelity(circ, noisy_sim_3) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     zxzxz_simulators[3] = (noisy_sim_3, infid_3)
 
     # Strength 4 (2.0 * x_strength_tilted)
@@ -298,7 +298,7 @@ def zxzxz_simulators_tilted():
             .add_overrotation(single_sys=h_gate_rotation, match=match_h)
             .add_overrotation(single_sys = cnot_gate_rotation, multi_sys=cnot_gate_rotation, match=match_cnot)
     )
-    infid_4 = 1 - sum(process_fidelity(circ, noisy_sim_4) for circ in circs) / len(circs)
+    infid_4 = 1 - sum(process_fidelity(circ, noisy_sim_4) for circ in easy_gate_circuits) / len(easy_gate_circuits)
     zxzxz_simulators[4] = (noisy_sim_4, infid_4)
 
     for label in strength:
