@@ -48,6 +48,10 @@ def get_hard_cycles(circuit: tq.Circuit):
 
     return [circuit[2*k+1] for k in range(circuit.n_cycles//2 -1)]
 
+def get_dressed_cycles(circuit: tq.Circuit):
+
+    return [circuit[2*k+1] for k in range(circuit.n_cycles//2 -1)]
+
 
 def process_fidelity(circuit: tq.Circuit, simulator):
     ideal_unitary_matrix = tq.Simulator().operator(circuit= circuit).upgrade().mat()
