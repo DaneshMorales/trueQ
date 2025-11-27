@@ -297,3 +297,66 @@ def effective_circuit(circuit: tq.Circuit, noisy_gates: dict):
     lst = reversed(lst)
     
     return tqm.Superop.from_ptm(reduce(np.matmul, lst))
+
+def effective_circuit_noise_list(circuit: tq.Circuit, noisy_gates: dict):
+
+    dressed_cycles = get_dressed_cycles(circuit)
+
+    lst = []
+    
+    lst.append(effective_first_dressed_cycle_noise(dressed_cycles[0], noisy_gates=noisy_gates))
+
+    for drs_cycle in dressed_cycles[1:-1]:
+        lst.append(effective_dressed_cycle_noise(drs_cycle, noisy_gates=noisy_gates))
+
+    lst.append(effective_last_dressed_cycle_noise(dressed_cycles[-1], noisy_gates=noisy_gates))
+
+    return lst
+
+
+
+##### CIRCUIT TEST GENERATION #####
+
+def rc_circuit(circuit: tq.Circuit, noisy_sim: tq.Simulator, n_randomizations: int):
+
+    rc_circs = tq.randomly_compile(circuit, n_compilations=n_randomizations)
+
+    lst = []
+
+    for circ in rc_circs:
+        lst.append(tqm.Superop.from_unitary(noisy_sim.operator(circuit=circ).mat()).ptm)
+
+    return tqm.Superop.from_ptm(np.mean(lst, axis=0))
+
+def random_cb_circuit(hard_gate: tq.Gate, easy_gate_set: list, depth: int):
+
+    if hard_gate == Gate.cx:
+        lst = []
+        for i in range(depth):
+            t1 = random.choice(easy_gate_set)
+            t2 = random.choice(easy_gate_set)
+            cycle = [tq.Cycle({0:t1, 1:t2}), tq.Cycle({(0,1):hard_gate}, marker=1)]
+            lst.append(cycle[0])
+            lst.append(cycle[1])
+        t1 = random.choice(easy_gate_set)
+        t2 = random.choice(easy_gate_set)
+        final_cycle = tq.Cycle({0:t1, 1:t2})
+        lst.append(final_cycle)
+        circ = tq.Circuit(lst)
+        circ.measure_all()
+        return circ
+    
+    else:
+        lst = []
+        for i in range(depth):
+            t = random.choice(easy_gate_set)
+            cycle = [tq.Cycle({0:t}), tq.Cycle({0:hard_gate}, marker=1)]
+            lst.append(cycle[0])
+            lst.append(cycle[1])
+        t = random.choice(easy_gate_set)
+        final_cycle = tq.Cycle({0:t})
+        lst.append(final_cycle)
+        circ = tq.Circuit(lst)
+        circ.measure_all()
+        return circ
+
