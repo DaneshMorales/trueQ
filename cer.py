@@ -93,7 +93,8 @@ def effective_first_dressed_gate_noise(hard_gate: tq.Gate, easy_gate: tq.Gate, n
             circ = tq.Circuit([{0:two_q_paulis[(p1, p2)] @ noisy_gates[hard_gate] @ noisy_gates[correction_gate(hard_gate, two_q_paulis[(p1, p2)]) @ easy_gate]}])
             lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
 
-    return tqm.Superop.from_ptm(np.conj(ptm[easy_gate]).T @ np.conj(ptm[hard_gate]).T @ np.mean(lst, axis=0)).ptm
+    return tqm.Superop.from_ptm(np.conj(ptm[easy_gate]).T@np.conj(ptm[hard_gate]).T @np.mean(lst, axis=0)).ptm
+
 
 def effective_first_dressed_cycle(dressed_cycle: list, noisy_gates: dict):
 
@@ -111,7 +112,7 @@ def effective_first_dressed_cycle(dressed_cycle: list, noisy_gates: dict):
         if hard_gate == Gate.cx:
             easy_gate_0 = easy_cycle.gates[(qubit[0],)]
             easy_gate_1 = easy_cycle.gates[(qubit[1],)]
-            lst.append(effective_dressed_gate(hard_gate, tq.Gate(np.kron(easy_gate_0.mat, easy_gate_1.mat)), noisy_gates=noisy_gates))
+            lst.append(effective_first_dressed_gate(hard_gate, tq.Gate(np.kron(easy_gate_0.mat, easy_gate_1.mat)), noisy_gates=noisy_gates))
     
     return tensor_product_list(lst)
 
@@ -252,7 +253,7 @@ def effective_last_dressed_gate_noise(easy_gate: tq.Gate, noisy_gates: dict):
         )
 
     return tqm.Superop.from_ptm(
-        np.conj(ptm[easy_gate]).T @ np.mean(lst, axis=0)
+        np.conj(np.mean(lst, axis=0)@ptm[easy_gate]).T
     ).ptm
 
 
