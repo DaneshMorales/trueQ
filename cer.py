@@ -59,19 +59,19 @@ def effective_first_dressed_gate(hard_gate: tq.Gate, easy_gate: tq.Gate, noisy_g
     lst = []
     if hard_gate == Gate.h:
         for p1 in paulis:
-            circ = tq.Circuit([{0:p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate]}])
-            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)    
+            gate = p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate]
+            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)    
 
     
     if hard_gate == Gate.t:
         for p1 in easy_gates:
-            circ = tq.Circuit([{0:p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate]}])
-            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+            gate = p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate]
+            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
     
     if hard_gate == Gate.cnot:
         for (p1,p2) in two_q_paulis.keys():
-            circ = tq.Circuit([{0:two_q_paulis[(p1,p2)]@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,two_q_paulis[(p1,p2)])@easy_gate]}])
-            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+            gate = two_q_paulis[(p1,p2)]@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,two_q_paulis[(p1,p2)])@easy_gate]
+            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
     
     return tqm.Superop.from_ptm(np.mean(lst, axis=0)).ptm
 
@@ -80,18 +80,18 @@ def effective_first_dressed_gate_noise(hard_gate: tq.Gate, easy_gate: tq.Gate, n
     lst = []
     if hard_gate == Gate.h:
         for p1 in paulis:
-            circ = tq.Circuit([{0:p1 @ noisy_gates[hard_gate] @ noisy_gates[correction_gate(hard_gate, p1) @ easy_gate]}])
-            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+            gate = p1 @ noisy_gates[hard_gate] @ noisy_gates[correction_gate(hard_gate, p1) @ easy_gate]
+            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
 
     if hard_gate == Gate.t:
         for p1 in easy_gates:
-            circ = tq.Circuit([{0:p1 @ noisy_gates[hard_gate] @ noisy_gates[correction_gate(hard_gate, p1) @ easy_gate]}])
-            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+            gate = p1 @ noisy_gates[hard_gate] @ noisy_gates[correction_gate(hard_gate, p1) @ easy_gate]
+            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
 
     if hard_gate == Gate.cnot:
         for (p1, p2) in two_q_paulis.keys():
-            circ = tq.Circuit([{0:two_q_paulis[(p1, p2)] @ noisy_gates[hard_gate] @ noisy_gates[correction_gate(hard_gate, two_q_paulis[(p1, p2)]) @ easy_gate]}])
-            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+            gate = two_q_paulis[(p1, p2)] @ noisy_gates[hard_gate] @ noisy_gates[correction_gate(hard_gate, two_q_paulis[(p1, p2)]) @ easy_gate]
+            lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
 
     return tqm.Superop.from_ptm(np.conj(ptm[easy_gate]).T@np.conj(ptm[hard_gate]).T @np.mean(lst, axis=0)).ptm
 
@@ -150,21 +150,21 @@ def effective_dressed_gate(hard_gate: tq.Gate, easy_gate: tq.Gate, noisy_gates: 
     if hard_gate == Gate.h:
         for p1 in paulis:
             for p2 in paulis:
-                circ = tq.Circuit([{0:p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj}])
-                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)    
+                gate = p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj
+                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)    
     
     
     if hard_gate == Gate.t:
         for p1 in easy_gates:
             for p2 in easy_gates:
-                circ = tq.Circuit([{0:p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj}])
-                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+                gate = p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj
+                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
     
     if hard_gate == Gate.cnot:
         for (p1,p2) in two_q_paulis.keys():
             for (p3,p4) in two_q_paulis.keys():
-                circ = tq.Circuit([{0:two_q_paulis[(p1,p2)]@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,two_q_paulis[(p1,p2)])@easy_gate@two_q_paulis[(p3,p4)]]@two_q_paulis[(p3,p4)].adj}])
-                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+                gate = two_q_paulis[(p1,p2)]@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,two_q_paulis[(p1,p2)])@easy_gate@two_q_paulis[(p3,p4)]]@two_q_paulis[(p3,p4)].adj
+                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
     
     return tqm.Superop.from_ptm(np.mean(lst, axis=0)).ptm
 
@@ -174,21 +174,21 @@ def effective_dressed_gate_noise(hard_gate: tq.Gate, easy_gate: tq.Gate, noisy_g
     if hard_gate == Gate.h:
         for p1 in paulis:
             for p2 in paulis:
-                circ = tq.Circuit([{0:p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj}])
-                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)    
+                gate = p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj
+                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)    
     
     
     if hard_gate == Gate.t:
         for p1 in easy_gates:
             for p2 in easy_gates:
-                circ = tq.Circuit([{0:p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj}])
-                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+                gate = p1@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,p1)@easy_gate@p2]@p2.adj
+                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
     
     if hard_gate == Gate.cnot:
         for (p1,p2) in two_q_paulis.keys():
             for (p3,p4) in two_q_paulis.keys():
-                circ = tq.Circuit([{0:two_q_paulis[(p1,p2)]@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,two_q_paulis[(p1,p2)])@easy_gate@two_q_paulis[(p3,p4)]]@two_q_paulis[(p3,p4)].adj}])
-                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)
+                gate = two_q_paulis[(p1,p2)]@noisy_gates[hard_gate]@noisy_gates[correction_gate(hard_gate,two_q_paulis[(p1,p2)])@easy_gate@two_q_paulis[(p3,p4)]]@two_q_paulis[(p3,p4)].adj
+                lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)
     
     return tqm.Superop.from_ptm(np.conj(ptm[easy_gate]).T@np.conj(ptm[hard_gate]).T@np.mean(lst, axis=0)).ptm
 
@@ -238,8 +238,8 @@ def effective_last_dressed_gate(easy_gate: tq.Gate, noisy_gates: dict):
     lst = []
 
     for p1 in paulis:
-        circ = tq.Circuit([{0:noisy_gates[easy_gate @ p1]@p1.adj}])
-        lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=circ).mat()).ptm)    
+        gate = noisy_gates[easy_gate @ p1]@p1.adj
+        lst.append(tqm.Superop.from_unitary(tq.Simulator().operator(circuit=tq.Circuit([{0: gate}])).mat()).ptm)    
     return tqm.Superop.from_ptm(np.mean(lst, axis=0)).ptm
 
 def effective_last_dressed_gate_noise(easy_gate: tq.Gate, noisy_gates: dict):
