@@ -15,7 +15,7 @@ clifford_gates = [
     tq.Gate.cliff0, tq.Gate.cliff1, tq.Gate.cliff2, tq.Gate.cliff3,
     tq.Gate.cliff4, tq.Gate.cliff5, tq.Gate.cliff6, tq.Gate.cliff7,
     tq.Gate.cliff8, tq.Gate.cliff9, tq.Gate.cliff10, tq.Gate.cliff11,
-    tq.Gate.cliff13, tq.Gate.cliff14, tq.Gate.cliff15,
+    tq.Gate.cliff13, tq.Gate.cliff14, tq.Gate.cliff15, tq.Gate.h,
     tq.Gate.cliff16, tq.Gate.cliff17, tq.Gate.cliff18, tq.Gate.cliff19,
     tq.Gate.cliff20, tq.Gate.cliff21, tq.Gate.cliff22, tq.Gate.cliff23
 ]
@@ -207,15 +207,15 @@ def calculate_process_fidelity(circuits: tq.CircuitCollection):
     fit = circuits.fit()
     return 1- fit.array('e_F', 'labels').vals[0]
 
-def run_cb_on_cycle(cycle: tq.Cycle, n_decays, n_randomizations, m_vals, noisy_sim):
+def run_cb_on_cycle(cycle: tq.Cycle, n_decays, n_randomizations, m_vals, noisy_sim, twirl = 'P', propagate_correction=False):
     
-    cb_circuits = tq.make_cb(cycles= cycle, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=n_decays)
+    cb_circuits = tq.make_cb(cycles= cycle, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=n_decays, twirl=twirl, propagate_correction=propagate_correction)
     noisy_sim.run(cb_circuits, n_shots=np.inf)
     return calculate_process_fidelity(cb_circuits)
 
-def run_cb_on_cycle_identity(n_randomizations, m_vals, noisy_sim):
+def run_cb_on_cycle_identity(n_randomizations, m_vals, noisy_sim, twirl = tq.Twirl('P',0), propagate_correction=False):
     
-    cb_circuits = tq.make_cb(cycles= {}, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=4, twirl=tq.Twirl('P',0))
+    cb_circuits = tq.make_cb(cycles= {}, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=4, twirl=twirl, propagate_correction=propagate_correction)
     noisy_sim.run(cb_circuits, n_shots=np.inf)
     return calculate_process_fidelity(cb_circuits)
 
@@ -362,17 +362,17 @@ def ZXZXZ_decompose_collection(circ_collection):
         decomposed_collection.append(ZXZXZ_decompose(circ))
     return tq.CircuitCollection(decomposed_collection)
 
-def run_cb_on_cycleZXZXZ(cycle: tq.Cycle, n_decays, n_randomizations, m_vals, noisy_sim):
+def run_cb_on_cycleZXZXZ(cycle: tq.Cycle, n_decays, n_randomizations, m_vals, noisy_sim, twirl = 'P', propagate_correction=False):
     
-    cb_circuits = tq.make_cb(cycles= cycle, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=n_decays)
-    cb_circuits = ZXZXZ_decompose_collection(cb_circuits)
+    cb_circuits = tq.make_cb(cycles= cycle, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=n_decays, twirl=twirl, propagate_correction=propagate_correction)
+    cb_circuits = ZXZXZ_decompose_collection(transpiler.compile(cb_circuits))
     noisy_sim.run(cb_circuits, n_shots=np.inf)
     return calculate_process_fidelity(cb_circuits)
 
-def run_cb_on_cycleZXZXZ_identity(n_randomizations, m_vals, noisy_sim):
+def run_cb_on_cycleZXZXZ_identity(n_randomizations, m_vals, noisy_sim, twirl=tq.Twirl('P',0), propagate_correction=False):
     
-    cb_circuits = tq.make_cb(cycles={}, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=4, twirl=tq.Twirl('P',0))
-    cb_circuits = ZXZXZ_decompose_collection(cb_circuits)
+    cb_circuits = tq.make_cb(cycles={}, n_circuits= n_randomizations, n_random_cycles= m_vals, n_decays=4, twirl=twirl, propagate_correction=propagate_correction)
+    cb_circuits = ZXZXZ_decompose_collection(transpiler.compile(cb_circuits))
     noisy_sim.run(cb_circuits, n_shots=np.inf)
     return calculate_process_fidelity(cb_circuits)
 
